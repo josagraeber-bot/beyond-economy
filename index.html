@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>beyond economy – Programm Mindmap 2026</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;background:#0b0618;overflow:hidden;font-family:system-ui,-apple-system,sans-serif}
+#canvas{width:100%;height:100%;display:block;user-select:none}
+#canvas.panning{cursor:grabbing}
+
+#toolbar{position:fixed;top:0;left:0;right:0;z-index:20;
+  background:rgba(11,6,24,0.97);border-bottom:1px solid rgba(130,255,0,0.2);
+  padding:8px 14px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.logo{font-size:13px;font-weight:700;color:#82ff00;letter-spacing:.06em;flex-shrink:0}
+.sep{width:1px;height:20px;background:rgba(255,255,255,.1);flex-shrink:0}
+button{padding:4px 11px;font-size:11px;font-weight:500;border-radius:5px;cursor:pointer;
+  background:rgba(170,120,240,.1);border:1px solid rgba(170,120,240,.32);
+  color:#c4a0f8;font-family:inherit;transition:background .1s;white-space:nowrap;flex-shrink:0}
+button:hover{background:rgba(170,120,240,.22)}
+button.g{background:rgba(130,255,0,.07);border-color:rgba(130,255,0,.28);color:#82ff00}
+button.g:hover{background:rgba(130,255,0,.16)}
+button.r{background:rgba(255,60,60,.07);border-color:rgba(255,60,60,.28);color:#ff7070}
+button.r:hover{background:rgba(255,60,60,.18)}
+.hint{font-size:10px;color:rgba(255,255,255,.2);margin-left:auto}
+
+#detail{position:fixed;top:46px;right:0;bottom:0;z-index:15;width:340px;
+  background:rgba(10,5,22,0.98);border-left:1px solid rgba(170,120,240,.18);
+  display:none;overflow-y:auto}
+#detail.open{display:block}
+.dh{position:sticky;top:0;z-index:5;background:rgba(10,5,22,0.98);
+  border-bottom:1px solid rgba(170,120,240,.12);padding:9px 13px;
+  display:flex;align-items:center;justify-content:space-between}
+.dh-lv{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.dh-x{padding:2px 8px;font-size:10px;border-radius:4px;cursor:pointer;
+  background:rgba(170,120,240,.1);border:1px solid rgba(170,120,240,.25);color:#aa78f0;font-family:inherit}
+.db{padding:13px}
+.dt{font-size:15px;font-weight:700;color:#fff;line-height:1.4;margin-bottom:4px}
+.ds{font-size:11px;color:rgba(255,255,255,.4);margin-bottom:12px;line-height:1.5}
+.dl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  color:rgba(255,255,255,.3);margin-bottom:6px;padding-bottom:4px;
+  border-bottom:1px solid rgba(255,255,255,.05)}
+.dp{font-size:12px;color:rgba(255,255,255,.75);line-height:1.7;
+  background:rgba(255,255,255,.04);border-left:2px solid;border-radius:0 5px 5px 0;padding:8px 11px;margin-bottom:10px}
+.dq{font-size:11.5px;color:rgba(255,255,255,.6);padding:3px 0 3px 10px;
+  border-left:1px solid rgba(255,255,255,.12);margin-bottom:3px;line-height:1.55}
+.dsp{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.dsp:last-child{border:none}
+.dav{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:9.5px;font-weight:700;flex-shrink:0}
+.dsn{font-size:11.5px;font-weight:600;color:#fff}
+.dsr{font-size:10px;color:rgba(255,255,255,.42);line-height:1.45;margin-top:1px}
+.dsd{font-size:10.5px;color:rgba(255,255,255,.58);line-height:1.55;margin-top:4px}
+.dtg{display:inline-block;font-size:9px;font-weight:600;padding:2px 6px;border-radius:8px;margin:3px 2px 0 0}
+.dbtn{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+.dbtn button{font-size:10.5px;padding:4px 10px}
+
+#legend{position:fixed;bottom:12px;left:12px;z-index:20;
+  background:rgba(10,5,22,.93);border:1px solid rgba(255,255,255,.06);
+  border-radius:7px;padding:9px 12px}
+.lr{display:flex;align-items:center;gap:7px;font-size:10.5px;color:rgba(255,255,255,.42);margin-bottom:4px}
+.lr:last-child{margin:0}
+.ld{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+
+#dropmsg{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);
+  background:rgba(130,255,0,.12);border:1px solid rgba(130,255,0,.4);
+  color:#82ff00;font-size:11px;font-weight:600;padding:6px 16px;border-radius:20px;
+  z-index:30;display:none;pointer-events:none}
+
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:100;
+  display:none;align-items:center;justify-content:center}
+.mbox{background:#130a28;border:1.5px solid #aa78f0;border-radius:11px;
+  padding:20px 22px;width:360px}
+.mbox label{display:block;font-size:10px;font-weight:700;color:#aa78f0;
+  text-transform:uppercase;letter-spacing:.09em;margin-bottom:6px}
+.mbox input,.mbox textarea,.mbox select{width:100%;padding:8px 10px;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.15);border-radius:6px;color:#fff;
+  font-size:13px;font-family:inherit;outline:none;margin-bottom:12px}
+.mbox textarea{resize:vertical;min-height:60px;line-height:1.5}
+.mbox input:focus,.mbox textarea:focus,.mbox select:focus{border-color:#82ff00}
+.mbox select option{background:#1a0e35;color:#fff}
+.mchk{display:flex;align-items:center;gap:8px;margin-bottom:12px;cursor:pointer}
+.mchk input[type=checkbox]{width:16px;height:16px;margin:0;cursor:pointer;accent-color:#82ff00}
+.mchk span{font-size:12px;color:rgba(255,255,255,.65)}
+.mrow{display:flex;gap:7px;justify-content:flex-end}
+.mok{padding:6px 18px;background:#321464;color:#82ff00;border:1.5px solid rgba(130,255,0,.45);
+  border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit}
+.mok:hover{background:#4a1f9a}
+.mcc{padding:6px 12px;background:transparent;color:rgba(255,255,255,.3);
+  border:1px solid rgba(255,255,255,.1);border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit}
+/* Speaker add modal */
+#spModal{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:101;
+  display:none;align-items:flex-start;justify-content:center;padding-top:40px;overflow-y:auto}
+.spbox{background:#130a28;border:1.5px solid #ffd84d;border-radius:12px;
+  padding:22px 24px;width:440px;margin-bottom:40px}
+.spbox h2{font-size:14px;font-weight:700;color:#ffd84d;margin-bottom:16px}
+.spbox label{display:block;font-size:10px;font-weight:700;color:rgba(255,255,255,.45);
+  text-transform:uppercase;letter-spacing:.09em;margin-bottom:5px}
+.spbox input,.spbox textarea,.spbox select{width:100%;padding:8px 10px;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);
+  border-radius:6px;color:#fff;font-size:13px;font-family:inherit;outline:none;margin-bottom:11px}
+.spbox textarea{resize:vertical;min-height:55px;line-height:1.5}
+.spbox input:focus,.spbox textarea:focus,.spbox select:focus{border-color:#ffd84d}
+.spbox select option{background:#1a0e35;color:#fff}
+.spbox .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.spbox .chkrow{display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap}
+.spbox .chk{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:rgba(255,255,255,.6)}
+.spbox .chk input{width:15px;height:15px;margin:0;accent-color:#82ff00;cursor:pointer}
+.sprow{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+.spok{padding:7px 20px;background:#321464;color:#ffd84d;border:1.5px solid rgba(255,212,77,.45);
+  border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit}
+.spok:hover{background:#4a1f9a}
+.spcc{padding:7px 12px;background:transparent;color:rgba(255,255,255,.3);
+  border:1px solid rgba(255,255,255,.1);border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit}
+</style>
+</head>
+<body>
+<div id="toolbar">
+  <span class="logo">beyond economy · Festival 2026</span>
+  <div class="sep"></div>
+  <button class="g" onclick="openSpeakerModal()">+ Speaker</button>
+  <button onclick="addChild()">+ Knoten</button>
+  <button onclick="startEdit()">✏ Umbenennen</button>
+  <button class="r" onclick="delSelected()">✕ Löschen</button>
+  <div class="sep"></div>
+  <button onclick="centerView()">⊙ Zentrieren</button>
+  <button onclick="doZoom(1.2)">＋</button>
+  <button onclick="doZoom(0.82)">－</button>
+  <div class="sep"></div>
+  <button class="g" id="btnSave" onclick="doSave()">💾 Speichern</button>
+  <button onclick="doLoad()">↺ Laden</button>
+  <button onclick="doReset()">⟳ Reset</button>
+  <span class="hint">Klick = Details · Doppelklick = Umbenennen · Speaker ziehen = Thema wechseln</span>
+</div>
+
+<svg id="canvas">
+  <defs>
+    <filter id="glow"><feGaussianBlur stdDeviation="6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="glowS"><feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <g id="world"><g id="gL"></g><g id="gN"></g></g>
+</svg>
+
+<div id="detail">
+  <div class="dh">
+    <span class="dh-lv" id="dLevel">—</span>
+    <button class="dh-x" onclick="closeDetail()">✕</button>
+  </div>
+  <div class="db" id="dBody"></div>
+</div>
+
+<div id="legend">
+  <div class="lr"><div class="ld" style="background:#82ff00"></div>Zentrum</div>
+  <div class="lr"><div class="ld" style="background:#aa78f0"></div>Fokusthema (8)</div>
+  <div class="lr"><div class="ld" style="background:#3dd6d0"></div>Themenvorschlag</div>
+  <div class="lr"><div class="ld" style="background:#ffd84d"></div>Speaker (70 gesamt)</div>
+  <div class="lr" style="margin-top:6px;font-size:10px;color:rgba(255,255,255,.25)">Speaker ziehen → auf Thema legen</div>
+</div>
+
+<div id="dropmsg" id="dropmsg">Hier ablegen → Thema wechseln</div>
+
+<div id="spModal">
+  <div class="spbox">
+    <h2>✦ Speaker hinzufügen</h2>
+
+    <div class="row2">
+      <div>
+        <label>Name *</label>
+        <input id="spName" type="text" placeholder="Vorname Nachname"/>
+      </div>
+      <div>
+        <label>Organisation</label>
+        <input id="spOrg" type="text" placeholder="Firma / Institution"/>
+      </div>
+    </div>
+
+    <label>Rolle / Position</label>
+    <input id="spRole" type="text" placeholder="z.B. CEO, Gründerin, Prof. Dr. ..."/>
+
+    <label>Kurzbeschreibung</label>
+    <textarea id="spDesc" placeholder="Warum passt diese Person? Was bringt sie ein?"></textarea>
+
+    <label>Formate</label>
+    <input id="spFormats" type="text" placeholder="z.B. Keynote, Panel, Zwiegespräch"/>
+
+    <label>Zuordnung – Thema oder Track *</label>
+    <select id="spParent"></select>
+
+    <div class="chkrow">
+      <label class="chk"><input type="checkbox" id="spBoard"/> <span>Board (bereits bekannt)</span></label>
+      <label class="chk"><input type="checkbox" id="spNoHonorar" checked/> <span>Kein Honorar erwartet</span></label>
+      <label class="chk"><input type="checkbox" id="spWoman"/> <span>Frau</span></label>
+    </div>
+
+    <div class="sprow">
+      <button class="spcc" onclick="closeSpeakerModal()">Abbrechen</button>
+      <button class="spok" onclick="confirmSpeakerModal()">Speaker hinzufügen ✦</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal">
+  <div class="mbox">
+    <label id="mlbl">Name (\n = neue Zeile)</label>
+    <input id="minp" type="text"/>
+    <div class="mrow">
+      <button class="mcc" onclick="closeModal()">Abbrechen</button>
+      <button class="mok" onclick="confirmModal()">Übernehmen</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var COL={root:'#82ff00',track:'#aa78f0',topic:'#3dd6d0',speaker:'#ffd84d'};
+var BG ={root:'#122800',track:'#1e0842',topic:'#062828',speaker:'#282000'};
+var RAD={root:68,track:52,topic:38,speaker:22};
+var LEVELS=['root','track','topic','speaker'];
+var LNAMES={root:'Zentrum',track:'Fokusthema',topic:'Themenvorschlag',speaker:'Speaker'};
+
+var R_TRACK=500, R_TOPIC=800, R_SPEAKER=1130;
+var TOPIC_FAN=20*Math.PI/180;   // ±20° per topic slot around track
+var SPEAKER_FAN=22*Math.PI/180; // ±22° total speaker arc per track
+
+var uid=8000; function nid(){return ++uid;}
+var AVC=[['#EEEDFE','#3C3489'],['#E1F5EE','#085041'],['#FAEEDA','#633806'],
+         ['#FAECE7','#993C1D'],['#E6F1FB','#0C447C'],['#EAF3DE','#27500A'],
+         ['#F1EFE8','#5F5E5A'],['#FBEAF0','#72243E']];
+
+// ── FULL DATA ───────────────────────────────────────────────────
+var TRACKS=[
+{id:10,label:'beyond AI\nData & Trust',
+ sub:'KI-Governance · Transparenz · Cyber-Resilienz · Datenstrategien',
+ focus:'Wie können Unternehmen KI verantwortungsvoll, skalierbar und vertrauenswürdig einsetzen?',
+ topics:[
+  {id:101,label:'KI entscheiden lassen –\naber wie?',sub:'Keynote 15 min',
+   pitch:'Von der KI-Strategie zur ethischen Architektur: Wer trägt Verantwortung, wenn Algorithmen operative Entscheidungen treffen?',
+   lf:['Wo endet Effizienz, wo beginnt Kontrollverlust?','Was macht KI-Systeme vertrauenswürdig?']},
+  {id:102,label:'Von der KI-Strategie\nzur KI-Kultur',sub:'Panel 40 min',
+   pitch:'Wer ist für KI-Verantwortung zuständig – und wie verändert sich Organisationskultur, wenn Daten zur Kernressource werden?',
+   lf:['Wie schafft man Akzeptanz für KI im Team?','Was unterscheidet KI-Piloten von KI-Organisationen?']},
+  {id:103,label:'Vertrauen by Design:\nWie wird KI akzeptiert?',sub:'Panel 40 min',
+   pitch:'Mitarbeitende fürchten KI, Kunden misstrauen ihr. Wie baut man echtes Vertrauen auf – technisch, kommunikativ und kulturell?',
+   lf:['Was macht KI akzeptiert – jenseits PR?','Wann wird Transparenz zum Differenzierer?']},
+  {id:104,label:'Daten als strategischer\nRohstoff',sub:'Panel 40 min',
+   pitch:'Datensouveränität und Qualität als Kernkompetenz – wem gehören Daten in Ökosystemen?',
+   lf:['Wem gehören Daten im Ökosystem?','Wie wird Datenqualität zur Differenzierung?']},
+  {id:105,label:'Regulierung als\nWettbewerbsvorteil?',sub:'Zwiegespräch 25 min',
+   pitch:'Kann der AI Act europäische KI glaubwürdiger machen – oder bremst er nur?',
+   lf:['Wer profitiert wirklich vom AI Act?','Wie wird Compliance zu Differenzierung?']}
+ ],
+ speakers:[
+  {id:1001,label:'Stefan Mesken\nDeepL',role:'Chief Scientist DeepL',desc:'Steht für den Beweis, dass KI ethisch und ökologisch nutzbar ist. Praxisnahe Unternehmer-Perspektive.',formats:'Keynote, Zwiegespräch',board:true,nohonorar:true,woman:false},
+  {id:1002,label:'Daniela Rittmaier\nCapgemini',role:'Head of GenAI Accelerator, Capgemini',desc:'Praxiserfahrung in datengetriebenen Transformationen im Mittelstand. Konkrete Governance-Perspektive.',formats:'Panel',board:true,nohonorar:true,woman:true},
+  {id:1003,label:'Dr. Anna Christmann\nEx-BMWK',role:'Ex-Beauftragte Digitale Wirtschaft & Start-ups',desc:'Politische Gestalterin des deutschen KI-Ökosystems. Kennt Regulierungsfragen aus erster Hand.',formats:'Panel, Fishbowl',board:true,nohonorar:true,woman:true},
+  {id:1004,label:'Christian Kroll\nEcosia',role:'Gründer Ecosia, Purpose-Tech-Pionier',desc:'Gründer der ökologischen Suchmaschine. Pionier für zweckgebundene Technologie und verantwortungsvolles KI-Unternehmertum.',formats:'Zwiegespräch, Keynote',board:true,nohonorar:true,woman:false},
+  {id:1005,label:'Nushin I. Yazdani\nEduc. Innovation Lab',role:'KI-Ethik-Researcherin, UX & Transformation Design',desc:'Forscht zu Bias in algorithmischen Systemen und intersektionalem Feminismus in der KI.',formats:'Panel, Fishbowl',board:false,nohonorar:true,woman:true},
+  {id:1006,label:'Prof. Alena Buyx\nTU München',role:'Professorin Medizinethik, Ex-Vorsitzende Ethikrat',desc:'Wichtigste öffentliche KI-Ethik-Stimme in Deutschland. Verbindet Wissenschaft, Politik und Unternehmensrealität.',formats:'Panel, Fishbowl',board:false,nohonorar:true,woman:true},
+  {id:1007,label:'Verena Pausder\nStartup-Verband',role:'Unternehmerin, Digitalpionierin, Vorsitzende Startup-Verband',desc:'Klare, zugängliche Stimme für digitale Bildung und KI-Kultur.',formats:'Keynote, Zwiegespräch',board:false,nohonorar:false,woman:true},
+  {id:1008,label:'Miriam Meckel\nada Learning',role:'Gründerin ada Learning, KI & Gesellschaft',desc:'Führende Stimme zu KI, Medien und gesellschaftlicher Verantwortung.',formats:'Keynote, Panel',board:false,nohonorar:false,woman:true},
+  {id:1009,label:'Janina Mütze\nCivey',role:'CEO & Co-Gründerin Civey, Data & AI',desc:'Pionierin für KI-gestützte Meinungsforschung. Zeigt wie Datenqualität und Vertrauen in Geschäftsmodellen zusammenhängen.',formats:'Panel, Startup Pitch',board:false,nohonorar:true,woman:true}
+ ]},
+
+{id:20,label:'beyond Ecosystems\n& Industries',
+ sub:'Kooperationsmodelle · Coopetition · Plattformen · Wertschöpfungsnetzwerke',
+ focus:'Wie entstehen funktionierende Ökosysteme? Wie lässt sich Coopetition operationalisieren?',
+ topics:[
+  {id:201,label:'Coopetition –\ndie unterschätzte Strategie',sub:'Keynote 15 min',
+   pitch:'Wann schafft geteilte Infrastruktur mehr Wert als proprietäre Stärke?',
+   lf:['Was ist das Geheimnis funktionierender Ökosysteme?','Wo liegen die echten Risiken von Coopetition?']},
+  {id:202,label:'Ökosysteme bauen:\nWas braucht es wirklich?',sub:'Panel 40 min',
+   pitch:'Kontrolle vs. Offenheit, Wachstum vs. Governance – wo scheitern die meisten Ökosystem-Initiativen?',
+   lf:['Wie baut man Governance ohne Bürokratie?','Regional vs. global: Was ist die bessere Basis?']},
+  {id:203,label:'Neue Allianzen:\nStart-ups & Konzerne',sub:'Panel 40 min',
+   pitch:'Jenseits von Innovation-Theater – was macht Partnerschaften zwischen David und Goliath nachhaltig?',
+   lf:['Was braucht es jenseits des ersten Handschlags?','Wann werden Kooperationen zu echten Allianzen?']},
+  {id:204,label:'Standards & geteilte\nInfrastruktur',sub:'Panel 40 min',
+   pitch:'Wer setzt Standards – und wer muss folgen? Interoperabilität als Grundlage industrieller Kooperation.',
+   lf:['Wann lohnt es, Standards zu setzen?','Wer profitiert von geteilter Infrastruktur?']},
+  {id:205,label:'Symtronics als Modell:\nWie entsteht ein Ökosystem?',sub:'Zwiegespräch 25 min',
+   pitch:'Michael Schwienbacher über Fehler, Wendepunkte und das Fundament, das andere vergessen.',
+   lf:['Was hätte man früher anders machen sollen?','Was ist das oft vergessene Fundament?']}
+ ],
+ speakers:[
+  {id:2001,label:'Dr. Klaus Sailer\nSCE München',role:'CEO Strascheg Center for Entrepreneurship, Prof.',desc:'Mitgründer UnternehmerTUM. Experte für Co-Creation, Ökosysteme und Innovationsnetzwerke.',formats:'Panel, Keynote',board:true,nohonorar:true,woman:false},
+  {id:2002,label:'Matthias Notz\nStart2 Group',role:'CEO Start2 Group, Munich Innovation Ecosystem',desc:'Aufbauer des Münchner Start-up-Ökosystems. Verbindet Industrie, Start-ups und internationale Talente.',formats:'Panel, Zwiegespräch',board:true,nohonorar:true,woman:false},
+  {id:2003,label:'Dagmar Fritz-Kramer\nBaufritz',role:'Familienunternehmerin, Kooperationsmodelle',desc:'Unternehmerin mit Fokus auf Kooperationsmodelle und regionale Wertschöpfung.',formats:'Zwiegespräch, Panel',board:true,nohonorar:true,woman:true},
+  {id:2004,label:'Eva S. Lihotzky\nServiceplan AI Lab',role:'General Manager Serviceplan AI Lab',desc:'Erfahrung in der Verbindung von Industriepartnern und Start-ups. Praxis-Governance-Perspektive.',formats:'Panel',board:true,nohonorar:true,woman:true},
+  {id:2005,label:'Florian Schlosshauer\nÖkosystem-Builder',role:'Unternehmer, Ökosystem-Builder',desc:'Praxiserfahrung im Aufbau branchenübergreifender Innovations-Ökosysteme.',formats:'Panel',board:true,nohonorar:true,woman:false},
+  {id:2006,label:'Svenja Falk\nAccenture Research',role:'Managing Director Accenture Research',desc:'Leitet globale Innovations- und Ökosystem-Forschung. Datenbasierte Perspektive auf Plattformstrategien.',formats:'Panel, Keynote',board:false,nohonorar:true,woman:true},
+  {id:2007,label:'Dr. Elif Özmen\nOHB SE',role:'Gründerin & CEO OHB SE',desc:'Tech-Gründerin mit deutschem und türkischem Hintergrund. Zeigt, wie New-Space-Ökosysteme entstehen.',formats:'Zwiegespräch, Panel',board:false,nohonorar:true,woman:true},
+  {id:2008,label:'Uwe Dierk\nPlattform-Strategie',role:'Industrieökonom, Plattform-Strategie',desc:'Verbindet industrielle Wertschöpfung mit Plattformlogik. Wissenschaftliche Perspektive für Praktiker:innen.',formats:'Panel',board:false,nohonorar:true,woman:false}
+ ]},
+
+{id:30,label:'beyond Resources\n& Energy',
+ sub:'Energie · Rohstoffe · Kreisläufe · Dekarbonisierung – kuratiert von Symtronics',
+ focus:'Wie sichere ich Energie, Rohstoffe und Standortfaktoren unter Volatilität und Klimadruck?',
+ topics:[
+  {id:301,label:'Die Energie-Zeitenwende:\nWas sie wirklich bedeutet',sub:'Keynote 15 min',
+   pitch:'Jenseits von Solar-Euphorie: Welche Investitionen rechnen sich für Industriestandorte 2026–2032?',
+   lf:['Welche Energiestrategie trägt wirklich?','Wo liegt der blinde Fleck der Dekarbonisierungsdebatte?']},
+  {id:302,label:'Kreisläufe industrialisieren:\nvom Pilot zur Skalierung',sub:'Panel 40 min',
+   pitch:'Was scheitert bei der Kreislaufwirtschaft in der Praxis – Fälle aus Elektronik, Metall und Chemie.',
+   lf:['Wann rechnen sich Kreisläufe wirtschaftlich?','Welche Hebel braucht Skalierung?']},
+  {id:303,label:'Kann Europa\nIndustriestandort bleiben?',sub:'Panel 40 min',
+   pitch:'Energiepreise, Regulierung, Fachkräftemangel – und trotzdem Argumente für Europa.',
+   lf:['Was sind die echten Standortrisiken?','Was muss Politik liefern?']},
+  {id:304,label:'Dekarbonisierung ohne\nDeindustrialisierung?',sub:'Zwiegespräch 25 min',
+   pitch:'Ein Industrieunternehmer und ein Klimaökonom im Streitgespräch über Klimaneutralität 2045.',
+   lf:['Was muss die Politik liefern?','Was müssen Unternehmen selbst tun?']}
+ ],
+ speakers:[
+  {id:3001,label:'Marie Jaroni\nthyssenkrupp Steel',role:'CEO thyssenkrupp Steel Europe (seit Nov. 2025)',desc:'Verantwortet grüne Transformation eines der größten Stahlproduzenten Europas.',formats:'Keynote, Panel',board:true,nohonorar:true,woman:true},
+  {id:3002,label:'Sabine Nallinger\nStiftung KlimaWirtschaft',role:'Vorständin Stiftung KlimaWirtschaft',desc:'Brücke zwischen Unternehmertum und Klimaschutz. Netzwerk in Industrie, Politik und NGOs.',formats:'Panel, Fishbowl',board:true,nohonorar:true,woman:true},
+  {id:3003,label:'Christian Bruch\nSiemens Energy',role:'CEO & President Siemens Energy',desc:'Führt eines der wichtigsten Energietechnologieunternehmen durch die Zeitenwende.',formats:'Keynote, Zwiegespräch',board:true,nohonorar:false,woman:false},
+  {id:3004,label:'Prof. Dr. C. Kemfert\nDIW Berlin',role:'DIW Berlin, Energieökonomin, Autorin',desc:'Deutschlands bekannteste Energieökonomin. Verbindet Analyse mit klaren Handlungsempfehlungen.',formats:'Keynote, Panel',board:false,nohonorar:true,woman:true},
+  {id:3005,label:'Prof. Dr. V. Grimm\nFAU Nürnberg',role:'Wirtschaftsweise, Prof. FAU Nürnberg',desc:'Mitglied des Sachverständigenrats. Klare ökonomische Perspektive auf Energiepreise.',formats:'Panel, Fishbowl',board:false,nohonorar:true,woman:true},
+  {id:3006,label:'Dr. Leila Niamir\nIIASA Wien',role:'Leiterin Klimarisiko-Forschung, IIASA Wien',desc:'Forscherin für Klimafinanzierung und nachhaltige Transformation. Internationaler Hintergrund.',formats:'Panel',board:false,nohonorar:true,woman:true},
+  {id:3007,label:'Jochen Flasbarth\nEx-BMZ',role:'Ex-Staatssekretär BMZ, Nachhaltigkeitsexpert',desc:'Langjähriger Umwelt- und Entwicklungsstaatssekretär. Tiefe Kenntnis von Klima- und Rohstoffpolitik.',formats:'Panel',board:false,nohonorar:true,woman:false}
+ ]},
+
+{id:40,label:'beyond Resilience\n& Safety',
+ sub:'Krisenfestigkeit · Lieferketten · Cyber Security · geopolitische Szenarien',
+ focus:'Wie können Unternehmen Krisen, Cyberangriffe und geopolitische Risiken antizipieren und steuern?',
+ topics:[
+  {id:401,label:'Polykrisen managen:\nLernen von der Sicherheitswelt',sub:'Keynote 15 min',
+   pitch:'Denkmodelle aus militärischer Planung machen Unternehmen robuster gegen systemische Krisen.',
+   lf:['Was unterscheidet Risikomanagement von Resilienz?','Wie trainiert man für das Unerwartete?']},
+  {id:402,label:'Lieferketten neu denken:\nResilienz vs. Effizienz',sub:'Panel 40 min',
+   pitch:'Nearshoring, Dual Sourcing und digitale Transparenz im direkten Vergleich.',
+   lf:['Wie viel Redundanz ist wirtschaftlich vertretbar?','Was ist der erste sinnvolle Schritt?']},
+  {id:403,label:'Geopolitik als\nUnternehmensrisiko',sub:'Panel 40 min',
+   pitch:'Handelskonflikte, Sanktionen, geopolitische Verschiebungen – was bedeutet das für Investitionsentscheidungen?',
+   lf:['Welche Märkte werden instabiler?','Wie baut man Szenariokompetenz auf?']},
+  {id:404,label:'Crisis Leadership:\nEntscheiden, wenn keine Zeit bleibt',sub:'Panel 40 min',
+   pitch:'Cyberangriff, Lieferausfall, Reputationskrise – vier ehrliche Erfahrungsberichte.',
+   lf:['Was war die härteste Entscheidung?','Wie trainiert man dafür?']}
+ ],
+ speakers:[
+  {id:4001,label:'Dr. Florence Gaub\nNATO Defense College',role:'Forschungsdirektorin NATO Defense College Rom',desc:'Weltweit führende Expertin für Geopolitik und strategische Zukunftsforschung.',formats:'Keynote, Zwiegespräch',board:true,nohonorar:false,woman:true},
+  {id:4002,label:'Simon Berkler\nTheDive',role:'Unternehmer, Resilienz & Systemdenker',desc:'Verbindet Systemdenken mit unternehmerischer Praxis zu organisationaler Resilienz.',formats:'Panel, Focustable',board:true,nohonorar:true,woman:false},
+  {id:4003,label:'Prof. Dr. S. Kurapati\nTU München',role:'AI & Digital Risk Forscherin, TU München',desc:'Forscherin zu KI-Risiken und digitaler Sicherheit. Verbindet technische und gesellschaftliche Risikoperspektiven.',formats:'Panel',board:false,nohonorar:true,woman:true},
+  {id:4004,label:'Katrin Suder\nEx-BMVg / DHL',role:'Ex-Staatssekretärin BMVg, Aufsichtsratsvors. DHL',desc:'Gestaltete Deutschlands digitale Sicherheitsstrategie. Verbindet Technologieverständnis mit strategischer Resilienz.',formats:'Panel, Keynote',board:false,nohonorar:true,woman:true},
+  {id:4005,label:'Prof. W. Ischinger\nEx-MSC',role:'Ex-Vorsitzender Münchner Sicherheitskonferenz',desc:'Einer der einflussreichsten Sicherheitspolitiker Europas. Einzigartiger Blick auf Geopolitik und wirtschaftliche Implikationen.',formats:'Keynote, Zwiegespräch',board:false,nohonorar:true,woman:false},
+  {id:4006,label:'Mirko Manske\nEx-BKA',role:'BKA Cybercrime-Experte (ret.)',desc:'Langjähriger Leiter Cyberabwehr Bundeskriminalamt. Konkretes Wissen über Angriffsmuster und Krisenmanagement.',formats:'Panel, Workshop',board:false,nohonorar:true,woman:false},
+  {id:4007,label:'Dr. C. Stelzenmüller\nBrookings Institution',role:'Senior Fellow Brookings Institution Washington D.C.',desc:'Führende Stimme zu transatlantischer Sicherheit, Demokratieresilienz und Geopolitik.',formats:'Panel',board:false,nohonorar:true,woman:true}
+ ]},
+
+{id:50,label:'beyond Capital\n& Ownership',
+ sub:'Finanzierungsmodelle · Verantwortungseigentum · Impact Investing · Nachfolge',
+ focus:'Wie können Kapital, Beteiligungen und Risikomanagement für Transformation mobilisiert werden?',
+ topics:[
+  {id:501,label:'Verantwortungseigentum:\nWenn Gewinn nicht Zweck ist',sub:'Keynote 15 min',
+   pitch:'Was ist Steward-Ownership wirklich – und warum wählen immer mehr Familienunternehmer:innen diesen Weg?',
+   lf:['Was verändert sich in der Unternehmensführung?','Was gewinnen und verlieren Eigentümer:innen?']},
+  {id:502,label:'Impact Investing:\nRendite & Wirkung',sub:'Panel 40 min',
+   pitch:'Blended Finance, Impact Bonds – wer investiert wirklich, was muss ein Unternehmen mitbringen?',
+   lf:['Was ist der echte Unterschied zu klassischem VC?','Wo liegt die Grenze zu Greenwashing?']},
+  {id:503,label:'Kapital für Transformation:\nWas wirklich verfügbar ist',sub:'Panel 40 min',
+   pitch:'Ehrliche Bestandsaufnahme von Impact-Kapital, Förderinstrumenten und neuen Modellen.',
+   lf:['Wo klafft die Finanzierungslücke?','Was erwarten neue Kapitalgeber-Generationen?']},
+  {id:504,label:'Nachfolge neu denken:\nWenn Exit nicht passt',sub:'Panel 40 min',
+   pitch:'Verantwortungseigentum, MBO, Stiftungslösung – was passt zu welchen Werten?',
+   lf:['Was soll aus Ihrem Unternehmen werden?','Welche Hürden sind unterschätzt?']},
+  {id:505,label:'ESG als Kapitalthema:\nWirkung vs. Greenwashing',sub:'Panel 40 min',
+   pitch:'ESG-Ratings beeinflussen Kapitalkosten – was bewirken sie wirklich?',
+   lf:['Was bewirken ESG-Ratings?','Wo kippt Impact in Theater?']}
+ ],
+ speakers:[
+  {id:5001,label:'Kristina Jeromin\nMade in Germany 2030',role:'Leiterin Made in Germany 2030, Stiftung Mercator',desc:'Gestalterin des deutschen ESG-Ökosystems. Brücke zwischen Finanzmarkt und Realwirtschaft. Mitglied Club of Rome.',formats:'Panel, Fishbowl',board:true,nohonorar:true,woman:true},
+  {id:5002,label:'Marcel Fratzscher\nDIW Berlin',role:'Präsident DIW Berlin, Ökonom, Autor',desc:'Einer der einflussreichsten Ökonomen Deutschlands. Neues Buch „Nach uns die Zukunft".',formats:'Keynote, Panel',board:true,nohonorar:false,woman:false},
+  {id:5003,label:'Philipp Krohn\nFrankfurter Allgemeine',role:'FAZ-Redakteur, Kapital & Gesellschaft',desc:'FAZ-Experte für Kapitalmarkt, Unternehmenskultur und soziale Aspekte des Wirtschaftens.',formats:'Panel, Moderator',board:true,nohonorar:true,woman:false},
+  {id:5004,label:'Irene Reifenhäuser\nUnternehmerin / GLS Bank',role:'Unternehmerin, Aufsichtsrätin GLS Bank',desc:'Praxiserfahrung mit alternativen Eigentumsmodellen. Zeigt, wie Verantwortungseigentum in der Realität aussieht.',formats:'Panel, Zwiegespräch',board:true,nohonorar:true,woman:true},
+  {id:5005,label:'Jörg Eigendorf\nDeutsche Bank',role:'Chief Sustainability Officer Deutsche Bank',desc:'Klare Stimme zu Purpose Economy und unternehmerischer Verantwortung.',formats:'Zwiegespräch, Moderator',board:true,nohonorar:true,woman:false},
+  {id:5006,label:'Judith Sandmeier\nPurpose Foundation',role:'Managing Director Purpose Foundation',desc:'Expertin für Verantwortungseigentum in der DACH-Region.',formats:'Panel, Workshop',board:false,nohonorar:true,woman:true},
+  {id:5007,label:'Lisa Jaspers\nFOLKDAYS',role:'Gründerin FOLKDAYS & Unlearn Business Lab',desc:'Zeigt, wie Social Business und Wirtschaftlichkeit zusammengehen.',formats:'Zwiegespräch, Panel',board:false,nohonorar:true,woman:true},
+  {id:5008,label:'Armin Steuernagel\nPurpose Foundation',role:'Co-Gründer Purpose Foundation & Evergreen Capital',desc:'Mitgründer der Purpose Foundation. Verbindet wirtschaftlichen Erfolg mit gesellschaftlicher Verantwortung.',formats:'Keynote, Panel',board:false,nohonorar:true,woman:false},
+  {id:5009,label:'Hariolf Wenzler\nAWO Württemberg',role:'CEO AWO Württemberg, Social Entrepreneur',desc:'Führt eine der größten Sozialorganisationen als modernes Unternehmen.',formats:'Panel',board:false,nohonorar:true,woman:false}
+ ]},
+
+{id:60,label:'beyond Workforce\n& (Un-)Learning',
+ sub:'Future of Work · Leadership · Upskilling · Organisationskultur · Diversität',
+ focus:'Wie können Organisationen Talente entwickeln, Kultur erneuern und kontinuierliches Lernen operationalisieren?',
+ topics:[
+  {id:601,label:'Das Ende der\nStellenbeschreibung',sub:'Keynote 15 min',
+   pitch:'Wenn KI operative Aufgaben übernimmt und Rollen sich monatlich wandeln – was bleibt dauerhaft menschlich?',
+   lf:['Was bleibt unveränderlich menschlich?','Wie bauen wir Organisationen, die sich selbst erneuern?']},
+  {id:602,label:'Führung in der Polykrise:\nKontrolle & Loslassen',sub:'Panel 40 min',
+   pitch:'Psychologische Sicherheit, Entscheidungsverantwortung und Leistungskultur – vier Führungspersönlichkeiten.',
+   lf:['Was macht Führung in Unsicherheit aus?','Was muss man aktiv verlernen?']},
+  {id:603,label:'Diversität als\nInnovationskraft',sub:'Panel 40 min',
+   pitch:'Diversität bringt mehr Innovation – was bedeutet das konkret für Recruiting, Struktur und Unternehmenskultur?',
+   lf:['Was ist echter Impact von Diversität?','Wie baut man Strukturen, die Diversität ermöglichen?']},
+  {id:604,label:'Fachkräftemangel strategisch\nangehen',sub:'Panel 40 min',
+   pitch:'Jenseits von Gehaltserhöhungen – was löst Fachkräftemangel strukturell?',
+   lf:['Was ist strukturell lösbar?','Wo sind die ungenutzten Talentquellen?']},
+  {id:605,label:'Unlernen als\nÜberlebensstrategie',sub:'Zwiegespräch 25 min',
+   pitch:'Was muss man aktiv verlernen, um in der nächsten Ära zu führen?',
+   lf:['Was war Ihr schwierigster Unlearn-Moment?','Was hält uns wirklich auf?']}
+ ],
+ speakers:[
+  {id:6001,label:'Magdalena Rogl\nResponsible Leadership',role:'Expertin Responsible Leadership (ex-Microsoft D&I)',desc:'Vom Stern „Botschafterin der Emotionen" genannt. Autorin „MitGefühl". 10 Jahre Microsoft D&I.',formats:'Keynote, Zwiegespräch',board:true,nohonorar:true,woman:true},
+  {id:6002,label:'Tristan Horx\nThe Future:Project',role:'Co-Gründer The Future:Project, Trendforscher',desc:'Zukunftsforscher der nächsten Generation. Verbindet Megatrends mit konkreten Implikationen für Arbeit und Lernen.',formats:'Future Impuls, Keynote',board:true,nohonorar:true,woman:false},
+  {id:6003,label:'Lena Papasabbas\nThe Future:Project',role:'Co-Gründerin The Future:Project, ex-Zukunftsinstitut',desc:'Autorin „Radikale Zuversicht". Megatrend-Expertin Konsumkultur, Wertewandel und Zukunft der Arbeit.',formats:'Keynote, Panel',board:true,nohonorar:true,woman:true},
+  {id:6004,label:'Julia Ledermann\nedding AG',role:'Unternehmerin, Beirat & Gesellschafterkreis edding AG',desc:'Perspektive der nächsten Unternehmergeneration auf Führung und Kultur.',formats:'Panel, Zwiegespräch',board:true,nohonorar:true,woman:true},
+  {id:6005,label:'Nora Oberländer\nHÜBNER-Gruppe',role:'Geschäftsführerin & CDO HÜBNER-Gruppe (3. Generation)',desc:'Junge Unternehmerin – klare Haltung zu Führung, Vielfalt und neuen Arbeitsmodellen.',formats:'Panel',board:true,nohonorar:true,woman:true},
+  {id:6006,label:'Yasmin Mei-Yee Weiß\nTH Nürnberg',role:'Professorin TH Nürnberg, Leadership & Diversity',desc:'Verbindet Diversität und inklusive Führung mit wirtschaftlicher Wirksamkeit.',formats:'Panel, Fishbowl',board:true,nohonorar:true,woman:true},
+  {id:6007,label:'Oskar Trautmann\nServiceplan',role:'Unternehmer, Young Leader, Plan.Net Studios',desc:'Repräsentiert die unternehmerische Next-Gen-Perspektive auf Talente und Zukunft der Arbeit.',formats:'Panel',board:true,nohonorar:true,woman:false},
+  {id:6008,label:'Martin Jende\nDB Fernverkehr',role:'Personalvorstand & Arbeitsdirektor DB Fernverkehr',desc:'Experte für Kompetenzentwicklung und Talentstrategien.',formats:'Panel, Focustable',board:true,nohonorar:true,woman:false},
+  {id:6009,label:'Tijen Onaran\nGlobal Digital Women',role:'Unternehmerin, Global Digital Women, Investorin',desc:'Gründerin Global Digital Women. Klare Stimme für Diversität, Sichtbarkeit und Unternehmertum.',formats:'Panel, Keynote',board:false,nohonorar:false,woman:true},
+  {id:6010,label:'Dr. Chidi Edeh\nSozialunternehmer',role:'Sozialunternehmer, interkulturelle Führung',desc:'Unternehmer mit nigerianischem Hintergrund, Experte für interkulturelle Teamführung.',formats:'Panel, Zwiegespräch',board:false,nohonorar:true,woman:false},
+  {id:6011,label:'Prof. Dr. I. Welpe\nTU München',role:'Professorin TU München, Strategie & Organisation',desc:'Spitzenforscherin zu Future of Work, digitaler Führung und Organisationsdesign.',formats:'Panel, Keynote',board:false,nohonorar:true,woman:true},
+  {id:6012,label:'Anke Domscheit-Berg\nBundestag',role:'MdB (SPD), Digitalpolitikerin & Netzaktivistin',desc:'Klare kritische Stimme zu digitaler Arbeit, Plattformarbeit und fairen Zukunftsarbeitsmodellen.',formats:'Panel, Fishbowl',board:false,nohonorar:true,woman:true}
+ ]},
+
+{id:70,label:'beyond Growth',
+ sub:'Regenerative Modelle · Kreislaufwirtschaft · neue Wertschöpfungslogiken · Repair & Reuse',
+ focus:'Wie lässt sich wirtschaftlicher Erfolg mit ökologischer und gesellschaftlicher Verantwortung verbinden?',
+ topics:[
+  {id:701,label:'Postwachstum ist\nkein Verzicht',sub:'Keynote 15 min',
+   pitch:'Regenerative Geschäftsmodelle sind oft profitabler als klassische – wenn man sie konsequent denkt.',
+   lf:['Was bedeutet Wachstum, wenn Ressourcen begrenzt sind?','Welche Modelle sind wirklich enkelfähig?']},
+  {id:702,label:'Kreislaufwirtschaft:\nWer verdient damit Geld?',sub:'Panel 40 min',
+   pitch:'Vier Unternehmen zeigen, wie Circular Economy zur Kernstrategie wurde.',
+   lf:['Was ist der häufigste Fehler beim Start?','Wie überzeugt man Investor:innen?']},
+  {id:703,label:'Regenerative Geschäftsmodelle:\nWirtschaften, das heilt',sub:'Panel 40 min',
+   pitch:'Vier Unternehmen mit ökologischem Mehrwert als Kernmechanik – jenseits von Greenwashing.',
+   lf:['Wo ist regenerativ profitabler?','Was brauchte es für den Paradigmenwechsel?']},
+  {id:704,label:'Neue Kennzahlen:\nNach BIP und Umsatz',sub:'Panel 40 min',
+   pitch:'Welche alternativen Messgrößen überzeugen Investor:innen, Vorstände und Mitarbeitende?',
+   lf:['Wie misst man Erfolg ohne reines Wachstum?','Was würden Sie anders machen?']},
+  {id:705,label:'Regionale Wertschöpfung:\nNähe als Wettbewerbsvorteil',sub:'Panel 40 min',
+   pitch:'Regionalisierung als Strategie, nicht als Notlösung.',
+   lf:['Wann ist regional wirklich profitabler?','Was braucht Regionalisierung als Norm?']}
+ ],
+ speakers:[
+  {id:7001,label:'Prof. Dr. Maja Göpel\nLeuphana',role:'Politökonomin, Transformationsforscherin, Autorin',desc:'Autorin „Unsere Welt neu denken". Verbindet Wissenschaft, Politik und Wirtschaft.',formats:'Keynote, Panel',board:false,nohonorar:false,woman:true},
+  {id:7002,label:'Michael Trautmann\nthjnk',role:'Mitgründer thjnk, Unternehmer & Podcaster',desc:'Vordenker für sinngetriebenes Wirtschaften und neue Wachstumslogiken.',formats:'Zwiegespräch, Panel',board:true,nohonorar:true,woman:false},
+  {id:7003,label:'Marcel Fratzscher\nDIW Berlin (Growth)',role:'Präsident DIW Berlin – Fokus: beyond Growth',desc:'Buch „Nach uns die Zukunft" zu Generationengerechtigkeit. Neue ökonomische Messgrößen.',formats:'Keynote, Panel',board:true,nohonorar:false,woman:false},
+  {id:7004,label:'Armin Steuernagel\nPurpose Foundation (Growth)',role:'Purpose Foundation, Entrepreneur & Autor',desc:'Wirtschaftlicher Erfolg und gesellschaftliche Verantwortung aus tiefer Überzeugung.',formats:'Keynote, Panel',board:false,nohonorar:true,woman:false},
+  {id:7005,label:'Prof. Dr. Niko Paech\nUniv. Siegen',role:'Postwachstumsökonom, Universität Siegen',desc:'Deutschlands bekanntester Wachstumskritiker. Provokante, empirisch fundierte Thesen.',formats:'Fishbowl, Zwiegespräch',board:false,nohonorar:true,woman:false},
+  {id:7006,label:'Harald Welzer\nFUTURZWEI',role:'Soziologe, Gründer FUTURZWEI, Autor',desc:'Sammelt Geschichten von Menschen, die anders wirtschaften. Starke Narrativ-Perspektive auf Wertewandel.',formats:'Keynote, Zwiegespräch',board:false,nohonorar:false,woman:false},
+  {id:7007,label:'Kate Raworth\nOxford University',role:'Ökonomin, Doughnut Economics, Oxford',desc:'Schöpferin des Donut-Modells. Eine der weltweit einflussreichsten Stimmen für neue Wirtschaftsmodelle.',formats:'Keynote',board:false,nohonorar:false,woman:true},
+  {id:7008,label:'Katharina Mayer\nCircular.Fashion',role:'Gründerin Circular.Fashion, Unternehmerin',desc:'Pionierin für digitale Kreislaufwirtschaft in der Modeindustrie.',formats:'Panel, Startup Pitch',board:false,nohonorar:true,woman:true},
+  {id:7009,label:'Paola Malavassi\nUnternehmerin',role:'Unternehmerin, Regenerative Economy Latam & D',desc:'Costaricansisch-deutsche Unternehmerin. Bringt globale Südperspektive auf regeneratives Wirtschaften.',formats:'Panel, Zwiegespräch',board:false,nohonorar:true,woman:true}
+ ]},
+
+{id:80,label:'beyond Markets\n& Consumption',
+ sub:'Neue Konsumlogiken · Marktverschiebungen · Wachstumskategorien · Markenstrategie',
+ focus:'Wie erkenne ich früh neue Märkte, Konsumtrends & Wertverschiebungen?',
+ topics:[
+  {id:801,label:'Die stille\nMarktrevolution',sub:'Keynote 15 min',
+   pitch:'Konsumverhalten verändert sich schneller als klassische Marktforschung zeigt – drei unsichtbare Verschiebungen.',
+   lf:['Was ist echter Wertewandel – was ist Trend?','Welche Kategorien werden verschwinden?']},
+  {id:802,label:'Marketing in der\nTransformation',sub:'Panel 40 min',
+   pitch:'Wenn Authentizität gefordert und Purpose-Washing sofort erkannt wird.',
+   lf:['Was unterscheidet echte Purpose-Brands?','Wie misst man Markenwirkung jenseits Reach?']},
+  {id:803,label:'Die Zukunft des Handels:\nWas überlebt?',sub:'Panel 40 min',
+   pitch:'Stationär, D2C, Plattformen, Social Commerce – welche Strukturen sind tragfähig?',
+   lf:['Welche Handelsformen sterben?','Was wollen Kund:innen wirklich?']},
+  {id:804,label:'Neue Wachstumskategorien:\nMärkte von morgen',sub:'Panel 40 min',
+   pitch:'Welche Kategorien werden in fünf Jahren groß – und warum sehen die meisten sie noch nicht?',
+   lf:['Welche Kategorie ist heute noch unsichtbar?','Wer erkennt sie zuerst?']},
+  {id:805,label:'Wertewandel im Konsum:\nEchte Verschiebung oder Wunschdenken?',sub:'Fishbowl 35 min',
+   pitch:'Marktforscher:in, Purpose-Brand, etablierte Marke, kritische Stimme im inneren Kreis.',
+   lf:['Was ist echter Strukturwandel?','Wann wird Purpose zur Kaufentscheidung?']}
+ ],
+ speakers:[
+  {id:8001,label:'Lena Papasabbas\nThe Future:Project (Mkt)',role:'The Future:Project, Konsumtrends',desc:'„Future:Guide Marketing". Megatrend-Expertin für neue Konsumlogiken und Marktverschiebungen.',formats:'Keynote, Panel',board:true,nohonorar:true,woman:true},
+  {id:8002,label:'Tristan Horx\nThe Future:Project (Mkt)',role:'The Future:Project, Consumer Trends',desc:'Future:Guide Marketing 2024. Trendsignale zu neuen Märkten und Wertewandel.',formats:'Future Impuls, Keynote',board:true,nohonorar:true,woman:false},
+  {id:8003,label:'Michael Trautmann\nthjnk (Mkt)',role:'Thjnk, Marketingexperte',desc:'Tiefes Verständnis für Markenführung, Konsumkultur und Marktverschiebungen.',formats:'Panel, Zwiegespräch',board:true,nohonorar:true,woman:false},
+  {id:8004,label:'Prof. Dr. C. Schuldt\nZukunftsinstitut',role:'Trendforscher, Zukunftsinstitut Frankfurt',desc:'Experte für Lifestyle-Trends und gesellschaftliche Wertverschiebungen.',formats:'Keynote, Panel',board:false,nohonorar:true,woman:false},
+  {id:8005,label:'Anna Alex\nNALA Earth',role:'Mitgründerin Outfittery, Gründerin NALA Earth',desc:'D2C-Pionierin und Investorin. Verbindet Start-up-Erfahrung mit Investor-Perspektive auf neue Märkte.',formats:'Panel, Startup Pitch',board:false,nohonorar:true,woman:true},
+  {id:8006,label:'Rolf Schrömgens\nEx-Trivago',role:'Mitgründer Trivago, Unternehmer & Investor',desc:'Skalierte globales Plattformgeschäftsmodell. Verständnis für Plattformökonomie und Kundenbindung.',formats:'Zwiegespräch, Panel',board:false,nohonorar:true,woman:false},
+  {id:8007,label:'Joana Breidenbach\nbetterplace.org',role:'Gründerin betterplace.org, Autorin',desc:'Pionierin für digitale Sozialwirtschaft und neue Konsumlogiken.',formats:'Panel, Zwiegespräch',board:false,nohonorar:true,woman:true},
+  {id:8008,label:'Sinah Diepold\nKreativwirtschaft',role:'Unternehmerin, Kreativwirtschaft & New Brands',desc:'Junge Unternehmerin aus der Kreativwirtschaft. Zeigt, wie neue Marken mit Werten entstehen.',formats:'Panel, Startup Pitch',board:false,nohonorar:true,woman:true},
+  {id:8009,label:'Nora-Vanessa Wohlert\nEdition F',role:'Co-Gründerin Edition F, Unternehmerin',desc:'Gründerin des führenden Mediums für wirtschaftsaffine Frauen. Tiefer Einblick in neue Konsumlogiken.',formats:'Panel, Zwiegespräch',board:false,nohonorar:true,woman:true}
+ ]}
+];
+
+// ── STATE ─────────────────────────────────────────────────────────
+var nodes={};  // id -> {id,label,level,x,y,parentId, data?}
+var selected=null;
+var dropTarget=null;  // during speaker drag
+
+// ── LAYOUT ────────────────────────────────────────────────────────
+function buildLayout(){
+  nodes={};
+  var N=TRACKS.length;
+  nodes[1]={id:1,label:'beyond economy\nFestival 2026',level:'root',x:0,y:0,parentId:null,data:null};
+
+  TRACKS.forEach(function(tr,ti){
+    var ta=(ti/N)*2*Math.PI - Math.PI/2;
+    var tx=Math.cos(ta)*R_TRACK, ty=Math.sin(ta)*R_TRACK;
+    nodes[tr.id]={id:tr.id,label:tr.label,level:'track',x:tx,y:ty,parentId:1,data:{sub:tr.sub,focus:tr.focus}};
+
+    // Topics
+    var Nt=tr.topics.length;
+    tr.topics.forEach(function(tp,fi){
+      var spread=Nt>1?TOPIC_FAN:0;
+      var fa=ta+(fi-(Nt-1)/2)*(spread/Math.max(Nt-1,1));
+      nodes[tp.id]={id:tp.id,label:tp.label,level:'topic',
+        x:Math.cos(fa)*R_TOPIC, y:Math.sin(fa)*R_TOPIC,
+        parentId:tr.id,data:{sub:tp.sub,pitch:tp.pitch,lf:tp.lf}};
+    });
+
+    // Speakers – fan around track angle at R_SPEAKER
+    var Ns=tr.speakers.length;
+    tr.speakers.forEach(function(sp,si){
+      var spread=Ns>1?SPEAKER_FAN:0;
+      var sa=ta+(si-(Ns-1)/2)*(spread/Math.max(Ns-1,1));
+      nodes[sp.id]={id:sp.id,label:sp.label,level:'speaker',
+        x:Math.cos(sa)*R_SPEAKER, y:Math.sin(sa)*R_SPEAKER,
+        parentId:tr.id,
+        data:{role:sp.role,desc:sp.desc,formats:sp.formats,board:sp.board,nohonorar:sp.nohonorar,woman:sp.woman}};
+    });
+  });
+}
+
+// ── PAN/ZOOM ───────────────────────────────────────────────────────
+var canvas=document.getElementById('canvas');
+var world=document.getElementById('world');
+var vx=0,vy=0,vz=1;
+var panning=false,px0=0,py0=0,pvx=0,pvy=0;
+var isDraggingNode=false,dragId=null,dox=0,doy=0;
+var lastMX=0,lastMY=0;
+
+function applyT(){world.setAttribute('transform','translate('+vx+','+vy+') scale('+vz+')');}
+function toSVG(cx,cy){
+  var r=canvas.getBoundingClientRect();
+  return{x:(cx-r.left-vx)/vz, y:(cy-r.top-vy)/vz};
+}
+function centerView(){
+  var det=document.getElementById('detail');
+  var dw=det.classList.contains('open')?340:0;
+  vx=(window.innerWidth-dw)/2; vy=window.innerHeight/2+20; vz=0.22;
+  applyT();
+}
+
+canvas.addEventListener('wheel',function(e){
+  e.preventDefault();
+  var r=canvas.getBoundingClientRect();
+  var mx=e.clientX-r.left, my=e.clientY-r.top;
+  var f=e.deltaY<0?1.11:0.90;
+  var nz=Math.max(0.04,Math.min(8,vz*f));
+  vx=mx-(mx-vx)*nz/vz; vy=my-(my-vy)*nz/vz; vz=nz; applyT();
+},{passive:false});
+
+document.addEventListener('mousedown',function(e){
+  if(e.button!==0)return;
+  if(e.target===canvas||e.target===world||
+     e.target.id==='gL'||e.target.id==='gN'){
+    panning=true;px0=e.clientX;py0=e.clientY;pvx=vx;pvy=vy;
+    canvas.classList.add('panning');
+  }
+});
+document.addEventListener('mousemove',function(e){
+  lastMX=e.clientX; lastMY=e.clientY;
+  if(isDraggingNode&&dragId!=null){
+    var pt=toSVG(e.clientX,e.clientY);
+    nodes[dragId].x=pt.x-dox; nodes[dragId].y=pt.y-doy;
+    // Find closest valid drop target if dragging a speaker
+    if(nodes[dragId].level==='speaker'){
+      dropTarget=findDropTarget(pt.x,pt.y,dragId);
+      showDropMsg(dropTarget);
+    }
+    render(); return;
+  }
+  if(panning){vx=pvx+(e.clientX-px0);vy=pvy+(e.clientY-py0);applyT();}
+});
+document.addEventListener('mouseup',function(e){
+  if(isDraggingNode&&dragId!=null&&nodes[dragId]&&nodes[dragId].level==='speaker'){
+    if(dropTarget!=null){
+      // Reparent the speaker
+      nodes[dragId].parentId=dropTarget;
+      // Move to nice position near new parent
+      var p=nodes[dropTarget];
+      var ang=Math.atan2(p.y,p.x);
+      var dist=p.level==='topic'?250:350;
+      nodes[dragId].x=p.x+Math.cos(ang+0.2)*dist;
+      nodes[dragId].y=p.y+Math.sin(ang+0.2)*dist;
+    }
+    dropTarget=null; showDropMsg(null);
+    render();
+  }
+  isDraggingNode=false;dragId=null;
+  panning=false; canvas.classList.remove('panning');
+});
+
+function findDropTarget(sx,sy,excludeId){
+  var best=null, bestD=140; // snap radius in SVG coords
+  Object.values(nodes).forEach(function(n){
+    if(n.id===excludeId) return;
+    if(n.level==='root'||n.level==='speaker') return;
+    var d=Math.sqrt((n.x-sx)*(n.x-sx)+(n.y-sy)*(n.y-sy));
+    if(d<bestD){bestD=d;best=n.id;}
+  });
+  return best;
+}
+function showDropMsg(targetId){
+  var el=document.getElementById('dropmsg');
+  if(targetId!=null&&nodes[targetId]){
+    el.style.display='block';
+    el.textContent='→ Ablegen bei: '+nodes[targetId].label.replace(/\n/g,' ');
+  } else {
+    el.style.display='none';
+  }
+}
+
+// ── SVG HELPERS ───────────────────────────────────────────────────
+var NS='http://www.w3.org/2000/svg';
+function E(tag,a){var e=document.createElementNS(NS,tag);for(var k in a)e.setAttribute(k,a[k]);return e;}
+function initials(name){
+  var p=name.split(/[\s\n]+/).filter(function(w){return w.length>1&&['Dr.','Prof.','Ex-','&'].indexOf(w)<0;});
+  return((p[0]||'?')[0]+(p[1]?p[1][0]:'')).toUpperCase();
+}
+
+// ── RENDER ────────────────────────────────────────────────────────
+var renderThrottle=null;
+function render(){
+  if(renderThrottle)cancelAnimationFrame(renderThrottle);
+  renderThrottle=requestAnimationFrame(_render);
+}
+function _render(){
+  var gL=document.getElementById('gL'); gL.innerHTML='';
+  var gNd=document.getElementById('gN'); gNd.innerHTML='';
+
+  // Links
+  Object.values(nodes).forEach(function(n){
+    if(!n.parentId)return;
+    var p=nodes[n.parentId]; if(!p)return;
+    var isDropTgt=(n.id===dropTarget);
+    var sw=n.level==='track'?2.8:n.level==='topic'?1.8:1;
+    var op=isDropTgt?0.8:0.28;
+    var line=E('line',{x1:p.x,y1:p.y,x2:n.x,y2:n.y,
+      stroke:isDropTgt?'#82ff00':COL[n.level],'stroke-width':isDropTgt?2.5:sw,'stroke-opacity':op});
+    gL.appendChild(line);
+  });
+
+  // Nodes (sorted: root & tracks on top)
+  var arr=Object.values(nodes).sort(function(a,b){
+    var o={root:3,track:2,topic:1,speaker:0};return(o[a.level]||0)-(o[b.level]||0);});
+
+  arr.forEach(function(n){
+    var r=RAD[n.level];
+    var isSel=selected===n.id;
+    var isDT=n.id===dropTarget;
+    var g=E('g',{transform:'translate('+n.x+','+n.y+')',style:'cursor:pointer'});
+
+    // Drop target glow
+    if(isDT){
+      g.appendChild(E('circle',{r:r+14,fill:'#82ff00',opacity:0.15,filter:'url(#glow)'}));
+      g.appendChild(E('circle',{r:r+10,fill:'none',stroke:'#82ff00','stroke-width':2,opacity:0.8}));
+    }
+    // Selection ring
+    if(isSel&&!isDT){
+      g.appendChild(E('circle',{r:r+9,fill:'none',stroke:COL[n.level],'stroke-width':2,'stroke-dasharray':'6 3',opacity:0.85}));
+    }
+    // Body
+    g.appendChild(E('circle',{r:r,fill:BG[n.level],stroke:isDT?'#82ff00':COL[n.level],'stroke-width':isSel||isDT?2.5:2}));
+
+    // Board badge (small outer arc indicator)
+    if(n.level==='speaker'&&n.data&&n.data.board){
+      g.appendChild(E('circle',{r:r+3,fill:'none',stroke:'#aa78f0','stroke-width':2,
+        'stroke-dasharray':(2*Math.PI*(r+3)*0.5)+' '+(2*Math.PI*(r+3)*0.5),
+        'stroke-dashoffset':0,opacity:0.6}));
+    }
+
+    // Text (white, black shadow)
+    var lines=n.label.split('\n').filter(Boolean);
+    var fs=n.level==='root'?14:n.level==='track'?11.5:n.level==='topic'?9.5:8.5;
+    var lh=fs*1.42;
+    var sy=-(lines.length-1)*lh/2;
+    lines.forEach(function(line,j){
+      // Shadow
+      var ts=E('text',{x:0,y:sy+j*lh,'text-anchor':'middle','dominant-baseline':'middle',
+        fill:'none',stroke:'rgba(0,0,0,0.95)','stroke-width':3.5,'stroke-linejoin':'round',
+        'font-size':fs,'font-weight':n.level==='root'||n.level==='track'?700:500,
+        'font-family':'system-ui,sans-serif','pointer-events':'none'});
+      ts.textContent=line; g.appendChild(ts);
+      // White text
+      var t=E('text',{x:0,y:sy+j*lh,'text-anchor':'middle','dominant-baseline':'middle',
+        fill:'#ffffff','font-size':fs,
+        'font-weight':n.level==='root'||n.level==='track'?700:500,
+        'font-family':'system-ui,sans-serif','pointer-events':'none'});
+      t.textContent=line; g.appendChild(t);
+    });
+
+    // Events
+    g.addEventListener('mousedown',function(e){
+      if(e.button!==0)return; e.stopPropagation();
+      selected=n.id;
+      var pt=toSVG(e.clientX,e.clientY);
+      isDraggingNode=true; dragId=n.id; dox=pt.x-n.x; doy=pt.y-n.y;
+      render(); showDetail(n);
+    });
+    g.addEventListener('dblclick',function(e){e.stopPropagation();selected=n.id;startEdit();});
+    g.addEventListener('contextmenu',function(e){
+      e.preventDefault();e.stopPropagation();
+      if(n.level==='root')return;
+      if(confirm('"'+n.label.replace(/\n/g,' ')+'" löschen?'))delNode(n.id);
+    });
+    gNd.appendChild(g);
+  });
+}
+
+canvas.addEventListener('click',function(e){
+  if(e.target===canvas||e.target===world||e.target.id==='gL'||e.target.id==='gN'){
+    selected=null; render();
+  }
+});
+
+// ── DETAIL PANEL ──────────────────────────────────────────────────
+var TGCOL={Board:'#EEEDFE|#3C3489',Neu:'#EAF3DE|#27500A',
+  'kein Honorar':'#E1F5EE|#085041',Frau:'#FBEAF0|#72243E'};
+function tag(t,style){
+  var c=(style||TGCOL[t]||'#F1EFE8|#5F5E5A').split('|');
+  return'<span class="dtg" style="background:'+c[0]+';color:'+c[1]+'">'+t+'</span>';
+}
+
+function showDetail(n){
+  var det=document.getElementById('detail');
+  var lv=document.getElementById('dLevel');
+  lv.textContent=LNAMES[n.level]; lv.style.color=COL[n.level];
+  var col=COL[n.level];
+  var html='<div class="dt">'+n.label.replace(/\n/g,'<br>')+'</div>';
+
+  if(n.level==='root'){
+    html+='<div class="ds">Festival · 28. Oktober 2026 · House of Communication, Werksviertel München</div>';
+    html+='<div class="dl">Überblick</div>';
+    html+='<div class="dp" style="border-color:'+col+'">8 Fokusthemen · 70+ Speaker · 1.500+ Teilnehmende · 150+ Partnerorganisationen. People – Profit – Planet als Leitprinzip.</div>';
+  } else if(n.level==='track'){
+    var d=n.data||{};
+    html+='<div class="ds">'+( d.sub||'')+'</div>';
+    html+='<div class="dl">Leitfrage</div>';
+    html+='<div class="dp" style="border-color:'+col+'">'+(d.focus||'')+'</div>';
+    // Count speakers
+    var spCount=Object.values(nodes).filter(function(x){
+      return x.level==='speaker'&&(x.parentId===n.id||
+        (nodes[x.parentId]&&nodes[x.parentId].parentId===n.id));
+    }).length;
+    html+='<div class="dl">Speaker in diesem Track ('+spCount+')</div>';
+    Object.values(nodes).filter(function(x){return x.level==='speaker'&&
+      (x.parentId===n.id||(nodes[x.parentId]&&nodes[x.parentId].parentId===n.id));
+    }).forEach(function(sp,i){
+      var sd=sp.data||{};
+      html+='<div class="dsp">';
+      var c=AVC[i%AVC.length];
+      html+='<div class="dav" style="background:'+c[0]+';color:'+c[1]+'">'+initials(sp.label.split('\n')[0])+'</div>';
+      html+='<div><div class="dsn">'+sp.label.split('\n')[0]+'</div>';
+      html+='<div class="dsr">'+(sp.label.split('\n')[1]||'')+'</div></div></div>';
+    });
+  } else if(n.level==='topic'){
+    var d=n.data||{};
+    html+='<div class="ds">'+(d.sub||'')+'</div>';
+    html+='<div class="dl">Pitch</div>';
+    html+='<div class="dp" style="border-color:'+col+'">'+(d.pitch||'')+'</div>';
+    if(d.lf&&d.lf.length){
+      html+='<div class="dl">Leitfragen</div>';
+      d.lf.forEach(function(q){html+='<div class="dq">'+q+'</div>';});
+    }
+    // Speaker assigned to this topic
+    var sps=Object.values(nodes).filter(function(x){return x.level==='speaker'&&x.parentId===n.id;});
+    if(sps.length){
+      html+='<div class="dl">Zugeordnete Speaker ('+sps.length+')</div>';
+      sps.forEach(function(sp,i){
+        var sd=sp.data||{};
+        html+='<div class="dsp">';
+        var c=AVC[i%AVC.length];
+        html+='<div class="dav" style="background:'+c[0]+';color:'+c[1]+'">'+initials(sp.label.split('\n')[0])+'</div>';
+        html+='<div><div class="dsn">'+sp.label.split('\n')[0]+'</div>';
+        html+='<div class="dsr">'+(sd.role||'')+'</div>';
+        html+='<div style="margin-top:3px">'+tag(sd.board?'Board':'Neu');
+        if(sd.nohonorar)html+=tag('kein Honorar');
+        if(sd.woman)html+=tag('Frau');
+        html+='</div></div></div>';
+      });
+    } else {
+      html+='<div class="dl">Speaker</div><div class="ds" style="padding:4px 0">Noch keine Speaker zugeordnet. Speaker per Drag & Drop hier ablegen.</div>';
+    }
+  } else if(n.level==='speaker'){
+    var d=n.data||{};
+    var pn=nodes[n.parentId];
+    html+='<div class="ds">'+(d.role||'')+'</div>';
+    if(pn){html+='<div class="ds" style="margin-top:-6px;color:rgba(255,255,255,.35)">Zugeordnet zu: '+pn.label.replace(/\n/g,' ')+'</div>';}
+    html+='<div class="dl">Profil</div>';
+    html+='<div class="dp" style="border-color:'+col+'">'+(d.desc||'')+'</div>';
+    html+='<div class="dl">Formate</div>';
+    html+='<div class="dsd">'+(d.formats||'')+'</div>';
+    html+='<div style="margin-top:8px">'+tag(d.board?'Board':'Neu');
+    if(d.nohonorar)html+=tag('kein Honorar');
+    if(d.woman)html+=tag('Frau');
+    html+='</div>';
+    html+='<div class="dl" style="margin-top:10px">Speaker verschieben</div>';
+    html+='<div class="ds">Speaker-Knoten in der Mindmap auf ein Thema ziehen, um es zuzuordnen.</div>';
+  }
+
+  html+='<div class="dbtn">';
+  html+='<button onclick="startEdit()">✏ Umbenennen</button>';
+  if(n.level!=='root'){
+    if(n.level!=='speaker')html+='<button class="g" onclick="addChild()">+ Kind</button>';
+    html+='<button class="r" onclick="delSelected()">✕ Löschen</button>';
+  }
+  html+='</div>';
+
+  document.getElementById('dBody').innerHTML=html;
+  det.classList.add('open');
+}
+function closeDetail(){document.getElementById('detail').classList.remove('open');}
+
+// ── MODAL ─────────────────────────────────────────────────────────
+var mcb=null;
+function openModal(lbl,val,cb){
+  document.getElementById('mlbl').textContent=lbl;
+  document.getElementById('minp').value=(val||'').replace(/\n/g,'\\n');
+  document.getElementById('modal').style.display='flex';
+  mcb=cb;
+  setTimeout(function(){var i=document.getElementById('minp');i.focus();i.select();},40);
+}
+function closeModal(){document.getElementById('modal').style.display='none';mcb=null;}
+function confirmModal(){
+  var v=document.getElementById('minp').value.trim().replace(/\\n/g,'\n');
+  if(mcb)mcb(v); closeModal();
+}
+document.getElementById('minp').addEventListener('keydown',function(e){
+  if(e.key==='Enter')confirmModal();
+  if(e.key==='Escape')closeModal();
+});
+
+// ── CRUD ──────────────────────────────────────────────────────────
+function startEdit(){
+  if(!selected)return;
+  var n=nodes[selected];
+  openModal(LNAMES[n.level]+' umbenennen (\\n = neue Zeile)',n.label,function(v){
+    if(v){nodes[selected].label=v;} render();
+    if(nodes[selected])showDetail(nodes[selected]);
+  });
+}
+function addChild(){
+  var pid=selected;
+  if(!pid){var r=Object.values(nodes).find(function(x){return x.level==='root';});if(r)pid=r.id;}
+  if(!pid)return;
+  var p=nodes[pid]; var li=LEVELS.indexOf(p.level);
+  if(li>=LEVELS.length-1){alert('Speaker können keine Kinder haben.');return;}
+  var cl=LEVELS[li+1]; var id=nid();
+  openModal('Neuen '+LNAMES[cl]+' benennen (\\n = neue Zeile)','',function(v){
+    if(!v)return;
+    nodes[id]={id:id,label:v,level:cl,x:p.x+(Math.random()-.5)*200,y:p.y+(Math.random()-.5)*200,parentId:pid,data:{}};
+    selected=id; render(); if(nodes[id])showDetail(nodes[id]);
+  });
+}
+function delSelected(){if(selected)delNode(selected);}
+function delNode(id){
+  if(!id||!nodes[id]||nodes[id].level==='root')return;
+  var rm=[];
+  function gather(nid){rm.push(nid);Object.values(nodes).forEach(function(n){if(n.parentId===nid)gather(n.id);});}
+  gather(id);
+  rm.forEach(function(i){delete nodes[i];});
+  if(rm.indexOf(selected)>=0){selected=null;closeDetail();}
+  render();
+}
+
+// ── TOOLBAR ───────────────────────────────────────────────────────
+function doZoom(f){
+  var nz=Math.max(0.04,Math.min(8,vz*f));
+  vx=window.innerWidth/2-(window.innerWidth/2-vx)*nz/vz;
+  vy=window.innerHeight/2-(window.innerHeight/2-vy)*nz/vz;
+  vz=nz; applyT();
+}
+function doSave(){
+  // Serialize: only position, parentId, label (data comes from source)
+  var save={}; Object.values(nodes).forEach(function(n){
+    save[n.id]={id:n.id,label:n.label,level:n.level,x:n.x,y:n.y,parentId:n.parentId};
+  });
+  localStorage.setItem('be_mm7',JSON.stringify(save));
+  var b=document.getElementById('btnSave');b.textContent='✓ Gespeichert';
+  setTimeout(function(){b.textContent='💾 Speichern';},2000);
+}
+function doLoad(){
+  try{
+    var s=localStorage.getItem('be_mm7');
+    if(!s){alert('Kein gespeicherter Stand.');return;}
+    var save=JSON.parse(s);
+    // Merge saved positions/parentIds back into full nodes
+    buildLayout(); // rebuild with all data
+    Object.values(save).forEach(function(sv){
+      if(nodes[sv.id]){
+        nodes[sv.id].x=sv.x; nodes[sv.id].y=sv.y;
+        nodes[sv.id].parentId=sv.parentId;
+        nodes[sv.id].label=sv.label;
+      }
+    });
+    selected=null;closeDetail();render();
+  }catch(e){alert('Fehler beim Laden.');}
+}
+function doReset(){
+  if(confirm('Auf Ausgangsdaten zurücksetzen? Alle Verschiebungen gehen verloren.')){
+    buildLayout();selected=null;closeDetail();centerView();render();
+  }
+}
+
+document.addEventListener('keydown',function(e){
+  if(document.getElementById('modal').style.display!=='none')return;
+  if(e.key==='+'||e.key==='=')doZoom(1.2);
+  if(e.key==='-')doZoom(0.82);
+  if(e.key==='Escape'){selected=null;closeDetail();render();}
+  if(e.key==='Delete'&&selected)delSelected();
+  if(e.key==='F2'&&selected)startEdit();
+});
+window.addEventListener('resize',function(){
+  canvas.setAttribute('width',window.innerWidth);canvas.setAttribute('height',window.innerHeight);
+});
+
+// ── SPEAKER MODAL ─────────────────────────────────────────────────
+function openSpeakerModal(){
+  // Populate parent dropdown: all tracks + all topics
+  var sel=document.getElementById('spParent');
+  sel.innerHTML='';
+  // Tracks first
+  var tracks=Object.values(nodes).filter(function(n){return n.level==='track';});
+  tracks.sort(function(a,b){return a.id-b.id;});
+  var grpTrack=document.createElement('optgroup');
+  grpTrack.label='── Fokusthemen (Track)';
+  tracks.forEach(function(t){
+    var o=document.createElement('option');
+    o.value=t.id;
+    o.textContent=t.label.replace(/\n/g,' – ');
+    // Pre-select if currently selected node is track or topic
+    if(selected===t.id||(nodes[selected]&&nodes[selected].parentId===t.id)) o.selected=true;
+    grpTrack.appendChild(o);
+  });
+  sel.appendChild(grpTrack);
+  // Topics grouped under their track
+  tracks.forEach(function(t){
+    var topics=Object.values(nodes).filter(function(n){return n.level==='topic'&&n.parentId===t.id;});
+    if(!topics.length)return;
+    var grp=document.createElement('optgroup');
+    grp.label='  '+t.label.replace(/\n/g,' ');
+    topics.sort(function(a,b){return a.id-b.id;});
+    topics.forEach(function(tp){
+      var o=document.createElement('option');
+      o.value=tp.id;
+      o.textContent='    '+tp.label.replace(/\n/g,' – ');
+      if(selected===tp.id) o.selected=true;
+      grp.appendChild(o);
+    });
+    sel.appendChild(grp);
+  });
+  // Reset form
+  document.getElementById('spName').value='';
+  document.getElementById('spOrg').value='';
+  document.getElementById('spRole').value='';
+  document.getElementById('spDesc').value='';
+  document.getElementById('spFormats').value='';
+  document.getElementById('spBoard').checked=false;
+  document.getElementById('spNoHonorar').checked=true;
+  document.getElementById('spWoman').checked=false;
+  document.getElementById('spModal').style.display='flex';
+  setTimeout(function(){document.getElementById('spName').focus();},60);
+}
+
+function closeSpeakerModal(){
+  document.getElementById('spModal').style.display='none';
+}
+
+function confirmSpeakerModal(){
+  var name=document.getElementById('spName').value.trim();
+  if(!name){document.getElementById('spName').focus();return;}
+  var org=document.getElementById('spOrg').value.trim();
+  var role=document.getElementById('spRole').value.trim();
+  var desc=document.getElementById('spDesc').value.trim();
+  var formats=document.getElementById('spFormats').value.trim();
+  var parentId=parseInt(document.getElementById('spParent').value,10);
+  var board=document.getElementById('spBoard').checked;
+  var nohonorar=document.getElementById('spNoHonorar').checked;
+  var woman=document.getElementById('spWoman').checked;
+
+  if(!parentId||!nodes[parentId]){alert('Bitte Zuordnung wählen.');return;}
+
+  var label=org?name+'\n'+org:name;
+  var p=nodes[parentId];
+  // Position near parent, slightly outward
+  var ang=Math.atan2(p.y,p.x);
+  var baseDist=p.level==='track'?R_SPEAKER:R_SPEAKER+80;
+  // Fan out from existing siblings
+  var siblings=Object.values(nodes).filter(function(n){return n.level==='speaker'&&n.parentId===parentId;});
+  var offset=(siblings.length-(siblings.length>0?1:0))*0.08;
+  var id=nid();
+  nodes[id]={
+    id:id, label:label, level:'speaker',
+    x:Math.cos(ang+offset)*baseDist,
+    y:Math.sin(ang+offset)*baseDist,
+    parentId:parentId,
+    data:{role:role||name,desc:desc||'Neu hinzugefügter Speaker.',formats:formats||'—',board:board,nohonorar:nohonorar,woman:woman}
+  };
+  selected=id;
+  closeSpeakerModal();
+  render();
+  showDetail(nodes[id]);
+}
+
+document.getElementById('spModal').addEventListener('keydown',function(e){
+  if(e.key==='Escape')closeSpeakerModal();
+  if(e.key==='Enter'&&(e.ctrlKey||e.metaKey))confirmSpeakerModal();
+});
+
+(function(){
+  canvas.setAttribute('width',window.innerWidth);
+  canvas.setAttribute('height',window.innerHeight);
+  buildLayout();
+  centerView();
+  render();
+})();
+</script>
+</body>
+</html>
